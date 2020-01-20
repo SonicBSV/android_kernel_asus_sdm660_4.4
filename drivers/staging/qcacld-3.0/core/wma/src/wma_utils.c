@@ -1583,6 +1583,15 @@ static int wma_unified_radio_tx_power_level_stats_event_handler(void *handle,
 							 fixed_param->radio_id;
 	tx_power_level_values = (uint8_t *) param_tlvs->tx_time_per_power_level;
 
+	if (rs_results->total_num_tx_power_levels &&
+	    fixed_param->total_num_tx_power_levels >
+		rs_results->total_num_tx_power_levels) {
+		WMA_LOGE("%s: excess tx_power buffers:%d, total_num_tx_power_levels:%d",
+			 __func__, fixed_param->total_num_tx_power_levels,
+			 rs_results->total_num_tx_power_levels);
+		return -EINVAL;
+	}
+
 	rs_results->total_num_tx_power_levels =
 				fixed_param->total_num_tx_power_levels;
 	if (!rs_results->total_num_tx_power_levels) {
@@ -4727,6 +4736,9 @@ QDF_STATUS wma_send_vdev_up_to_fw(t_wma_handle *wma,
 			 params->vdev_id, bssid);
 		return QDF_STATUS_SUCCESS;
 	}
+
+	if (!wma_is_vdev_valid(params->vdev_id))
+		return QDF_STATUS_E_FAILURE;
 
 	wma_update_roam_offload_flag(wma, params->vdev_id, true);
 	status = wmi_unified_vdev_up_send(wma->wmi_handle, bssid, params);
