@@ -32,6 +32,7 @@
 #include "cds_concurrency.h"
 #include "cds_utils.h"
 #include "wma_sar_public_structs.h"
+#include "ol_txrx.h"
 
 typedef void *WMA_HANDLE;
 
@@ -608,17 +609,15 @@ void wma_cleanup_vdev_resp_and_hold_req(void *priv);
 QDF_STATUS wma_send_dhcp_ind(uint16_t type, uint8_t device_mode,
 			     uint8_t *mac_addr, uint8_t *sta_mac_addr);
 
-#ifdef FW_THERMAL_THROTTLE_SUPPORT
 /**
- * wma_update_thermal_mitigation_to_fw() - update thermal mitigation to fw
- * @wma: wma handle
- * @thermal_level: thermal level
+ * wma_mgmt_pktcapture_status_map() - map Tx status for MGMT packets
+ * with packet capture Tx status
+ * @status: Tx status
+ * @is_data_pkt: Tx status for data packets
  *
- * This function sends down thermal mitigation params to the fw
- *
- * Returns: QDF_STATUS_SUCCESS for success otherwise failure
+ * Return: pktcapture_tx_status enum
  */
-QDF_STATUS wma_update_thermal_mitigation_to_fw(uint8_t thermal_level);
-#endif
+enum pktcapture_tx_status
+wma_mgmt_pktcapture_status_map(uint8_t status);
 
 #endif
