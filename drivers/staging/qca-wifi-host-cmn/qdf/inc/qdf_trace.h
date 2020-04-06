@@ -80,8 +80,8 @@ typedef int (qdf_abstract_print)(void *priv, const char *fmt, ...);
 /*
  * Rate limit based on pkt prototype
  */
-#define QDF_MAX_DHCP_PKTS_PER_SEC       (10)
-#define QDF_MAX_EAPOL_PKTS_PER_SEC      (10)
+#define QDF_MAX_DHCP_PKTS_PER_SEC       (20)
+#define QDF_MAX_EAPOL_PKTS_PER_SEC      (50)
 #define QDF_MAX_ARP_PKTS_PER_SEC        (5)
 #define QDF_MAX_DNS_PKTS_PER_SEC        (5)
 #define QDF_MAX_OTHER_PKTS_PER_SEC      (1)
@@ -878,7 +878,7 @@ void qdf_dp_set_proto_event_bitmap(uint32_t value);
  * Return: none
  */
 void qdf_dp_log_proto_pkt_info(uint8_t *sa, uint8_t *da, uint8_t type,
-			       uint8_t subtype, uint8_t dir, uint8_t msdu_id,
+			       uint8_t subtype, uint8_t dir, uint16_t msdu_id,
 			       uint8_t status);
 #else
 static inline
@@ -961,7 +961,7 @@ void qdf_dp_trace_data_pkt(qdf_nbuf_t nbuf, uint8_t pdev_id,
 
 static inline
 void qdf_dp_log_proto_pkt_info(uint8_t *sa, uint8_t *da, uint8_t type,
-			       uint8_t subtype, uint8_t dir, uint8_t msdu_id,
+			       uint8_t subtype, uint8_t dir, uint16_t msdu_id,
 			       uint8_t status)
 {
 }
@@ -1185,11 +1185,11 @@ struct category_name_info {
  * Return: nothing
  *
  */
-void qdf_trace_msg_cmn(unsigned int idx,
+static inline void qdf_trace_msg_cmn(unsigned int idx,
 			QDF_MODULE_ID category,
 			QDF_TRACE_LEVEL verbose,
 			const char *str_format,
-			va_list val);
+			va_list val) {}
 
 /**
  * struct qdf_print_ctrl: QDF Print Control structure
@@ -1301,8 +1301,10 @@ QDF_STATUS qdf_print_set_category_verbose(unsigned int idx,
  *
  * Return : Verbose enabled(true) or disabled(false) or invalid input (false)
  */
-bool qdf_print_is_category_enabled(unsigned int idx,
-				   QDF_MODULE_ID category);
+static inline bool qdf_print_is_category_enabled(unsigned int idx,
+				   QDF_MODULE_ID category) {
+	return false;
+}
 
 /**
  * qdf_print_is_verbose_enabled() - Get verbose information of a category for
@@ -1314,9 +1316,11 @@ bool qdf_print_is_category_enabled(unsigned int idx,
  *
  * Return : Verbose enabled(true) or disabled(false) or invalid input (false)
  */
-bool qdf_print_is_verbose_enabled(unsigned int idx,
+static inline bool qdf_print_is_verbose_enabled(unsigned int idx,
 				  QDF_MODULE_ID category,
-				  QDF_TRACE_LEVEL verbose);
+				  QDF_TRACE_LEVEL verbose) {
+	return false;
+}
 
 /**
  * qdf_print_clean_node_flag() - Clean up node flag for print control object

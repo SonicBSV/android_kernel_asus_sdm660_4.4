@@ -1489,12 +1489,13 @@ uint8_t qdf_get_rate_limit_by_type(uint8_t type)
 
 /**
  * qdf_get_pkt_type_string() - Get the string based on pkt type
- * @subtype: packet type
+ * @type: packet type
+ * @subtype: packet subtype
  *
  * Return: String based on pkt type
  */
 static
-uint8_t *qdf_get_pkt_type_string(uint8_t subtype)
+uint8_t *qdf_get_pkt_type_string(uint8_t type, uint8_t subtype)
 {
 	switch (subtype) {
 	case QDF_PROTO_EAPOL_M1:
@@ -1515,6 +1516,12 @@ uint8_t *qdf_get_pkt_type_string(uint8_t subtype)
 		return "DHCP-A";
 	case QDF_PROTO_DHCP_NACK:
 		return "DHCP-NA";
+	case QDF_PROTO_DHCP_RELEASE:
+		return "DHCP-REL";
+	case QDF_PROTO_DHCP_INFORM:
+		return "DHCP-IN";
+	case QDF_PROTO_DHCP_DECLINE:
+		return "DHCP-DEC";
 	case QDF_PROTO_ARP_REQ:
 		return "ARP-RQ";
 	case QDF_PROTO_ARP_RES:
@@ -1524,7 +1531,18 @@ uint8_t *qdf_get_pkt_type_string(uint8_t subtype)
 	case QDF_PROTO_DNS_RES:
 		return "DNS_RS";
 	default:
-		return "UNKNOWN";
+		switch (type) {
+		case QDF_PROTO_TYPE_EAPOL:
+			return "EAP";
+		case QDF_PROTO_TYPE_DHCP:
+			return "DHCP";
+		case QDF_PROTO_TYPE_ARP:
+			return "ARP";
+		case QDF_PROTO_TYPE_DNS:
+			return "DNS";
+		default:
+			return "UNKNOWN";
+		}
 	}
 }
 
@@ -1566,28 +1584,37 @@ uint8_t *qdf_get_pkt_status_string(uint8_t status)
  * Return: none
  */
 void qdf_dp_log_proto_pkt_info(uint8_t *sa, uint8_t *da, uint8_t type,
-			       uint8_t subtype, uint8_t dir, uint8_t msdu_id,
+			       uint8_t subtype, uint8_t dir, uint16_t msdu_id,
 			       uint8_t status)
 {
 	uint8_t pkt_rate_limit;
-	static ulong last_ticks[QDF_PROTO_SUBTYPE_MAX] = {0};
+	static ulong last_ticks_tx[QDF_PROTO_SUBTYPE_MAX] = {0};
+	static ulong last_ticks_rx[QDF_PROTO_SUBTYPE_MAX] = {0};
 	ulong curr_ticks = jiffies;
 
 	pkt_rate_limit = qdf_get_rate_limit_by_type(type);
 
-	if (!time_after(curr_ticks, last_ticks[subtype] + HZ / pkt_rate_limit))
+	if ((dir == QDF_TX &&
+	     !time_after(curr_ticks,
+			 last_ticks_tx[subtype] + HZ / pkt_rate_limit)) ||
+	    (dir == QDF_RX &&
+	     !time_after(curr_ticks,
+			 last_ticks_rx[subtype] + HZ / pkt_rate_limit)))
 		return;
 
-	last_ticks[subtype] = curr_ticks;
+	if (dir == QDF_TX)
+		last_ticks_tx[subtype] = curr_ticks;
+	else
+		last_ticks_rx[subtype] = curr_ticks;
 
 	if (status == QDF_TX_RX_STATUS_INVALID)
 		qdf_nofl_info("%s %s: SA:%pM DA:%pM",
-			      qdf_get_pkt_type_string(subtype), dir ? "RX":"TX",
-			      sa, da);
+			      qdf_get_pkt_type_string(type, subtype),
+			      dir ? "RX":"TX", sa, da);
 	else
 		qdf_nofl_info("%s %s: SA:%pM DA:%pM msdu_id:%d status: %s",
-			      qdf_get_pkt_type_string(subtype), dir ? "RX":"TX",
-			      sa, da, msdu_id,
+			      qdf_get_pkt_type_string(type, subtype),
+			      dir ? "RX":"TX", sa, da, msdu_id,
 			      qdf_get_pkt_status_string(status));
 }
 
@@ -2052,7 +2079,7 @@ void qdf_dp_display_proto_pkt_always(struct qdf_dp_trace_record_s *record,
 {
 	int loc;
 	char prepend_str[QDF_DP_TRACE_PREPEND_STR_SIZE];
-	struct qdf_dp_trace_proto_buf *buf =
+	struct qdf_dp_trace_proto_buf *buf __maybe_unused =
 		(struct qdf_dp_trace_proto_buf *)record->data;
 
 	qdf_mem_zero(prepend_str, sizeof(prepend_str));
@@ -3123,6 +3150,7 @@ static inline void print_to_console(char *str_buffer)
 }
 #endif
 
+#if 0
 #ifdef MULTI_IF_NAME
 static const char *qdf_trace_wlan_modname(void)
 {
@@ -3206,6 +3234,7 @@ void qdf_trace_msg_cmn(unsigned int idx,
 	}
 }
 qdf_export_symbol(qdf_trace_msg_cmn);
+#endif
 
 QDF_STATUS qdf_print_setup(void)
 {
@@ -3629,6 +3658,7 @@ QDF_STATUS qdf_print_set_category_verbose(unsigned int idx,
 }
 qdf_export_symbol(qdf_print_set_category_verbose);
 
+#if 0
 bool qdf_print_is_category_enabled(unsigned int idx, QDF_MODULE_ID category)
 {
 	QDF_TRACE_LEVEL verbose_mask;
@@ -3700,6 +3730,7 @@ bool qdf_print_is_verbose_enabled(unsigned int idx, QDF_MODULE_ID category,
 	return verbose_enabled;
 }
 qdf_export_symbol(qdf_print_is_verbose_enabled);
+#endif
 
 #ifdef DBG_LVL_MAC_FILTERING
 
