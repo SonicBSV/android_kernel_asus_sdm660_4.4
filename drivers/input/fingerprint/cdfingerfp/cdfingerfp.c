@@ -40,9 +40,6 @@
 #include <linux/regulator/consumer.h>
 #include <linux/fb.h>
 #include <linux/notifier.h>
-/* Huaqin modify for cpu_boost by leiyu at 2018/04/25 start */
-#include <linux/sched.h>
-/* Huaqin modify for cpu_boost by leiyu at 2018/04/25 end */
 #include "../common/fingerprint_common.h"
 
 typedef struct key_report {
@@ -102,7 +99,7 @@ struct cdfinger_key_map {
 static int isInKeyMode = 0; // key mode
 static int irq_flag = 0;
 static int screen_status = 1; // screen on
-static u8 cdfinger_debug = 0x01;
+static u8 cdfinger_debug = 0x00;
 static char wake_flag = 0;
 #define CDFINGER_DBG(fmt, args...) \
 	do{ \
@@ -477,7 +474,9 @@ static void cdfinger_enable_irq(struct cdfingerfp_data *pdata)
 {
 	if (pdata->irq_enable_status == 0)
 	{
-		commonfp_irq_enable();
+//		commonfp_irq_enable();
+		enable_irq(gpio_to_irq(pdata->irq_num));
+		enable_irq_wake(gpio_to_irq(pdata->irq_num));
 		pdata->irq_enable_status = 1;
 	}
 }
@@ -486,7 +485,9 @@ static void cdfinger_disable_irq(struct cdfingerfp_data *pdata)
 {
 	if (pdata->irq_enable_status == 1)
 	{
-		commonfp_irq_disable();
+//		commonfp_irq_disable();
+		disable_irq(gpio_to_irq(pdata->irq_num));
+		disable_irq_wake(gpio_to_irq(pdata->irq_num));
 		pdata->irq_enable_status = 0;
 	}
 }
@@ -561,7 +562,6 @@ static long cdfinger_ioctl(struct file* filp, unsigned int cmd, unsigned long ar
 			break;
 		case CDFINGER_INIT_IRQ:
 			err = cdfinger_eint_gpio_init(cdfinger);
-			cdfinger_debug = 0x00;
 			break;
 		case CDFINGER_WAKE_LOCK:
 			cdfinger_wake_lock(cdfinger,arg);
@@ -644,7 +644,6 @@ static int cdfinger_fb_notifier_callback(struct notifier_block* self,
 		sched_set_boost(0);
 /* Huaqin modify for cpu_boost by leiyu at 2018/04/25 end */
 #endif
-		printk("sunlin==FB_BLANK_UNBLANK==\n");
             break;
         case FB_BLANK_POWERDOWN:
 		mutex_lock(&g_cdfingerfp_data->buf_lock);
@@ -652,7 +651,6 @@ static int cdfinger_fb_notifier_callback(struct notifier_block* self,
 		if (isInKeyMode == 0)
 			cdfinger_async_report();
 		mutex_unlock(&g_cdfingerfp_data->buf_lock);
-		printk("sunlin==FB_BLANK_POWERDOWN==\n");
             break;
         default:
             break;
