@@ -1776,8 +1776,9 @@ static QDF_STATUS hdd_dis_connect_handler(struct hdd_adapter *adapter,
 	/* indicate 'disconnect' status to wpa_supplicant... */
 	hdd_send_association_event(dev, roam_info);
 
-	if (hdd_ctx->config->p2p_disable_roam &&
-	    (adapter->device_mode == QDF_P2P_CLIENT_MODE)) {
+	if ((hdd_ctx->config->sta_disable_roam &
+	    LFR3_STA_ROAM_DISABLE_BY_P2P) && (adapter->device_mode ==
+	    QDF_P2P_CLIENT_MODE)) {
 		hdd_debug("enable roam");
 		wlan_hdd_enable_roaming(adapter);
 	}
@@ -2190,10 +2191,8 @@ QDF_STATUS hdd_roam_register_sta(struct hdd_adapter *adapter,
 		hdd_conn_set_authenticated(adapter, true);
 		hdd_objmgr_set_peer_mlme_auth_state(adapter->vdev, true);
 	} else {
-#ifdef WLAN_DEBUG
 		hdd_debug("ULA auth StaId= %d. Changing TL state to CONNECTED at Join time",
 			 sta_ctx->conn_info.staId[0]);
-#endif
 		qdf_status =
 			hdd_change_peer_state(adapter, staDesc.sta_id,
 						OL_TXRX_PEER_STATE_CONN,
@@ -2830,7 +2829,8 @@ hdd_association_completion_handler(struct hdd_adapter *adapter,
 		}
 
 		if (adapter->device_mode == QDF_P2P_CLIENT_MODE &&
-		    hdd_ctx->config->p2p_disable_roam) {
+		    (hdd_ctx->config->sta_disable_roam &
+		    LFR3_STA_ROAM_DISABLE_BY_P2P)) {
 			hdd_debug("p2p cli active keep disable roam");
 		} else {
 			/*
@@ -3554,6 +3554,8 @@ hdd_association_completion_handler(struct hdd_adapter *adapter,
 		     roamStatus == eCSR_ROAM_CANCELLED) &&
 		    hddDisconInProgress)
 			complete(&adapter->disconnect_comp_var);
+
+		policy_mgr_check_concurrent_intf_and_restart_sap(hdd_ctx->psoc);
 	}
 
 	hdd_periodic_sta_stats_start(adapter);
