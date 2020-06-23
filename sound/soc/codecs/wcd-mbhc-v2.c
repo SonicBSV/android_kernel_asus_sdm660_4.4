@@ -1599,11 +1599,6 @@ static void wcd_mbhc_detect_plug_type(struct wcd_mbhc *mbhc)
 	pr_debug("%s: leave\n", __func__);
 }
 
-#ifdef CONFIG_MACH_ASUS_X00T
-int hph_ext_en_gpio = -1;
-int hph_ext_sw_gpio = -1;
-#endif
-
 static void wcd_mbhc_swch_irq_handler(struct wcd_mbhc *mbhc)
 {
 	bool detection_type = 0;
@@ -1621,24 +1616,6 @@ static void wcd_mbhc_swch_irq_handler(struct wcd_mbhc *mbhc)
 		pr_debug("%s: button press is canceled\n", __func__);
 
 	WCD_MBHC_REG_READ(WCD_MBHC_MECH_DETECTION_TYPE, detection_type);
-
-#ifdef CONFIG_MACH_ASUS_X00T
-	#if 0
-	pr_err("%s: %s external headphone switch\n", __func__,detection_type ? "Enable" : "Disable");
-
-	if (!gpio_is_valid(hph_ext_en_gpio) || !gpio_is_valid(hph_ext_sw_gpio)) {
-		pr_err("%s: Invalid gpio: %d,%d\n", __func__,hph_ext_en_gpio,hph_ext_sw_gpio);
-	}
-
-	if (detection_type) {
-		gpio_direction_output(hph_ext_en_gpio, 1);
-		gpio_direction_output(hph_ext_sw_gpio, 1);
-	} else {
-		gpio_direction_output(hph_ext_sw_gpio, 0);
-		gpio_direction_output(hph_ext_en_gpio, 0);
-	}
-	#endif
-#endif
 
 	/* Set the detection type appropriately */
 	WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_MECH_DETECTION_TYPE,
