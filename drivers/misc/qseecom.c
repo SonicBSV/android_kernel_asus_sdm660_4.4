@@ -5998,7 +5998,7 @@ static int __qseecom_set_clear_ce_key(struct qseecom_dev_handle *data,
 	if (qseecom.qsee.instance != qseecom.ce_drv.instance) {
 		ret = __qseecom_enable_clk(CLK_CE_DRV);
 		if (ret)
-			return ret;
+		return ret;
 	}
 
 	ret = qseecom_scm_call(SCM_SVC_TZSCHEDULER, 1,
@@ -9453,3 +9453,4 @@ MODULE_DESCRIPTION("QTI Secure Execution Environment Communicator");
 
 module_init(qseecom_init);
 module_exit(qseecom_exit);
+
