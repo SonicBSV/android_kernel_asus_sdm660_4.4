@@ -2086,4 +2086,3 @@ struct hdcp_ops *hdcp_1x_start(void *input)
 {
 	return ((struct hdcp_1x *)input)->ops;
 }
-
