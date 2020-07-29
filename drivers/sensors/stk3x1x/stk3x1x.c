@@ -289,7 +289,7 @@ static struct sensors_classdev sensors_light_cdev = {
 	.version = 1,
 	.handle = SENSORS_LIGHT_HANDLE,
 	.type = SENSOR_TYPE_LIGHT,
-	.max_range = "65535",
+	.max_range = "6500",
 	.resolution = "0.0625",
 	.sensor_power = "0.09",
 	.min_delay = 0,	/* us */
@@ -632,46 +632,12 @@ static int stk3x1x_i2c_smbus_write_byte_data(struct i2c_client *client, unsigned
 	return err;
 }
 
-/* Ambient Ligh Sensor Gain Table
- * {lux, value}, */
-static uint32_t als_level_table[][2] = {
-	{0, 0},
-	{1, 2},
-	{18, 22},
-	{300, 336},
-	{350, 413},
-	{600, 840},
-	{1000, 1546},
-	{4000, 4840},
-	{9000, 9410},
-	{30000, 30000}, //alignment
-	{40000, 40000},
-};
-
-static int als_gain(int alscode)
-{
-	int i = 0;
-	int max = sizeof(als_level_table) / sizeof(als_level_table[0]);
-
-	if (alscode <= 0)
-		return 0;
-
-	for (i = 1 ; i < max; i++) {
-		if (alscode <= als_level_table[i][0])
-			return als_level_table[i-1][1] + ((als_level_table[i][1]-als_level_table[i-1][1]) * 
-					(alscode - als_level_table[i-1][0])) / (als_level_table[i][0] - als_level_table[i-1][0]);
-	}
-
-	return als_level_table[max-2][1] + ((als_level_table[max-1][1] - als_level_table[max-2][1]) * 
-				(alscode - als_level_table[max-2][0])) / (als_level_table[max-1][0] - als_level_table[max-2][0]);
-}
-
 uint32_t stk_alscode2lux(struct stk3x1x_data *ps_data, uint32_t alscode)
 {
 	alscode += ((alscode<<7)+(alscode<<3)+(alscode>>1));
 	alscode<<=3;
 	alscode/=ps_data->als_transmittance;
-	return als_gain(alscode);
+	return alscode;
 }
 
 uint32_t stk_lux2alscode(struct stk3x1x_data *ps_data, uint32_t lux)
@@ -1091,16 +1057,38 @@ static int32_t stk3x1x_get_state(struct stk3x1x_data *ps_data)
 
 static void stk_ps_report(struct stk3x1x_data *ps_data, int nf)
 {
+/*
+#ifdef QUALCOMM_PLATFORM
+	ktime_t	timestamp = ktime_get_boottime();
+#endif
+*/
 	ps_data->ps_distance_last = nf;
 	input_report_abs(ps_data->ps_input_dev, ABS_DISTANCE, nf);
+#ifdef QUALCOMM_PLATFORM
+/*	input_event(ps_data->ps_input_dev, EV_SYN, SYN_TIME_SEC, ktime_to_timespec(timestamp).tv_sec);
+	input_event(ps_data->ps_input_dev, EV_SYN, SYN_TIME_NSEC, ktime_to_timespec(timestamp).tv_nsec);
+*/
+	input_event(ps_data->ps_input_dev, EV_SYN, SYN_REPORT,0);
+#endif
 	input_sync(ps_data->ps_input_dev);
 	wake_lock_timeout(&ps_data->ps_wakelock, 3*HZ);
 }
 
 static void stk_als_report(struct stk3x1x_data *ps_data, int als)
 {
+/*
+#ifdef QUALCOMM_PLATFORM
+	ktime_t	timestamp = ktime_get_boottime();
+#endif
+*/
 	ps_data->als_lux_last = als;
 	input_report_abs(ps_data->als_input_dev, ABS_MISC, als);
+#ifdef QUALCOMM_PLATFORM
+/*	input_event(ps_data->als_input_dev, EV_SYN, SYN_TIME_SEC, ktime_to_timespec(timestamp).tv_sec);
+	input_event(ps_data->als_input_dev, EV_SYN, SYN_TIME_NSEC, ktime_to_timespec(timestamp).tv_nsec);
+*/
+	input_event(ps_data->als_input_dev, EV_SYN, SYN_REPORT,0);
+#endif
 	input_sync(ps_data->als_input_dev);
 #ifdef STK_DEBUG_PRINTF
 	printk(KERN_INFO "%s: als input event %d lux\n",__func__, als);
