@@ -460,8 +460,8 @@ static int tfa98xx_dbgfs_temp_set(void *data, u64 val)
 }
 
 static ssize_t tfa98xx_dbgfs_start_set(struct file *file,
-				     const char __user *user_buf,
-				     size_t count, loff_t *ppos)
+	const char __user *user_buf,
+	size_t count, loff_t *ppos)
 {
 	struct i2c_client *i2c = file->private_data;
 	struct tfa98xx *tfa98xx = i2c_get_clientdata(i2c);
@@ -502,8 +502,8 @@ static ssize_t tfa98xx_dbgfs_start_set(struct file *file,
 }
 
 static ssize_t tfa98xx_dbgfs_r_read(struct file *file,
-				     char __user *user_buf, size_t count,
-				     loff_t *ppos)
+	char __user *user_buf, size_t count,
+	loff_t *ppos)
 {
 	struct i2c_client *i2c = file->private_data;
 	struct tfa98xx *tfa98xx = i2c_get_clientdata(i2c);
@@ -539,13 +539,14 @@ static ssize_t tfa98xx_dbgfs_r_read(struct file *file,
 
 	if (tfa98xx->tfa->spkr_count > 1) {
 		ret = snprintf(str, PAGE_SIZE,
-		              "Prim:%d mOhms, Sec:%d mOhms\n",
-		              tfa98xx->tfa->mohm[0],
-		              tfa98xx->tfa->mohm[1]);
-	} else {
+			"Prim:%d mOhms, Sec:%d mOhms\n",
+			tfa98xx->tfa->mohm[0],
+			tfa98xx->tfa->mohm[1]);
+	}
+	else {
 		ret = snprintf(str, PAGE_SIZE,
-		              "Prim:%d mOhms\n",
-		              tfa98xx->tfa->mohm[0]);
+			"Prim:%d mOhms\n",
+			tfa98xx->tfa->mohm[0]);
 	}
 
 	pr_debug("[0x%x] calib_done: %s", tfa98xx->i2c->addr, str);
@@ -563,8 +564,8 @@ r_c_err:
 }
 
 static ssize_t tfa98xx_dbgfs_version_read(struct file *file,
-				     char __user *user_buf, size_t count,
-				     loff_t *ppos)
+	char __user *user_buf, size_t count,
+	loff_t *ppos)
 {
 	char str[] = TFA98XX_VERSION "\n";
 	int ret;
@@ -575,8 +576,8 @@ static ssize_t tfa98xx_dbgfs_version_read(struct file *file,
 }
 
 static ssize_t tfa98xx_dbgfs_dsp_state_get(struct file *file,
-				     char __user *user_buf, size_t count,
-				     loff_t *ppos)
+	char __user *user_buf, size_t count,
+	loff_t *ppos)
 {
 	struct i2c_client *i2c = file->private_data;
 	struct tfa98xx *tfa98xx = i2c_get_clientdata(i2c);
@@ -594,7 +595,7 @@ static ssize_t tfa98xx_dbgfs_dsp_state_get(struct file *file,
 		str = "Failed init\n";
 		break;
 	case TFA98XX_DSP_INIT_PENDING:
-		str =  "Pending init\n";
+		str = "Pending init\n";
 		break;
 	case TFA98XX_DSP_INIT_DONE:
 		str = "Init complete\n";
@@ -610,8 +611,8 @@ static ssize_t tfa98xx_dbgfs_dsp_state_get(struct file *file,
 }
 
 static ssize_t tfa98xx_dbgfs_dsp_state_set(struct file *file,
-				     const char __user *user_buf,
-				     size_t count, loff_t *ppos)
+	const char __user *user_buf,
+	size_t count, loff_t *ppos)
 {
 	struct i2c_client *i2c = file->private_data;
 	struct tfa98xx *tfa98xx = i2c_get_clientdata(i2c);
@@ -623,7 +624,7 @@ static ssize_t tfa98xx_dbgfs_dsp_state_set(struct file *file,
 	const char mon_stop_cmd[] = "monitor stop";
 	int buf_size;
 
-	buf_size = min(count, (size_t)(sizeof(buf)-1));
+	buf_size = min(count, (size_t)(sizeof(buf) - 1));
 	if (copy_from_user(buf, user_buf, buf_size))
 		return -EFAULT;
 	buf[buf_size] = 0;
@@ -656,8 +657,8 @@ static ssize_t tfa98xx_dbgfs_dsp_state_set(struct file *file,
 }
 
 static ssize_t tfa98xx_dbgfs_fw_state_get(struct file *file,
-				     char __user *user_buf, size_t count,
-				     loff_t *ppos)
+	char __user *user_buf, size_t count,
+	loff_t *ppos)
 {
 	struct i2c_client *i2c = file->private_data;
 	struct tfa98xx *tfa98xx = i2c_get_clientdata(i2c);
@@ -674,7 +675,7 @@ static ssize_t tfa98xx_dbgfs_fw_state_get(struct file *file,
 		str = "Fail\n";
 		break;
 	case TFA98XX_DSP_FW_OK:
-		str =  "Ok\n";
+		str = "Ok\n";
 		break;
 	default:
 		str = "Invalid\n";
@@ -685,49 +686,9 @@ static ssize_t tfa98xx_dbgfs_fw_state_get(struct file *file,
 	return simple_read_from_buffer(user_buf, count, ppos, str, strlen(str));
 }
 
-#ifdef CONFIG_SND_SOC_TFA9874
-extern int send_tfa_cal_apr(void *buf, int cmd_size, bool bRead);
-#endif
-
-#ifdef CONFIG_SND_SOC_TFA9874
 static ssize_t tfa98xx_dbgfs_rpc_read(struct file *file,
-				     char __user *user_buf, size_t count,
-				     loff_t *ppos)
-{
-	struct i2c_client *i2c = file->private_data;
-	struct tfa98xx *tfa98xx = i2c_get_clientdata(i2c);
-	int ret = 0;
-	uint8_t *buffer;
-
-	buffer = kmalloc(count, GFP_KERNEL);
-	if (buffer == NULL) {
-		pr_err("[0x%x] can not allocate memory\n", i2c->addr);
-		return -ENOMEM;
-	}
-
-	mutex_lock(&tfa98xx->dsp_lock);
-
-	ret = send_tfa_cal_apr(buffer, count, true);
-
-	mutex_unlock(&tfa98xx->dsp_lock);
-	if (ret) {
-		pr_err("[0x%x] dsp_msg_read error: %d\n", i2c->addr, ret);
-		kfree(buffer);
-		return -EFAULT;
-	}
-
-	ret = copy_to_user(user_buf, buffer, count);
-	kfree(buffer);
-	if (ret)
-		return -EFAULT;
-
-	*ppos += count;
-	return count;
-}
-#else
-static ssize_t tfa98xx_dbgfs_rpc_read(struct file *file,
-				     char __user *user_buf, size_t count,
-				     loff_t *ppos)
+	char __user *user_buf, size_t count,
+	loff_t *ppos)
 {
 	struct i2c_client *i2c = file->private_data;
 	struct tfa98xx *tfa98xx = i2c_get_clientdata(i2c);
@@ -766,51 +727,10 @@ static ssize_t tfa98xx_dbgfs_rpc_read(struct file *file,
 	*ppos += count;
 	return count;
 }
-#endif
 
-#ifdef CONFIG_SND_SOC_TFA9874
 static ssize_t tfa98xx_dbgfs_rpc_send(struct file *file,
-				     const char __user *user_buf,
-				     size_t count, loff_t *ppos)
-{
-	struct i2c_client *i2c = file->private_data;
-	struct tfa98xx *tfa98xx = i2c_get_clientdata(i2c);
-	uint8_t *buffer;
-	int err = 0;
-
-	if (count == 0)
-		return 0;
-
-	/* msg_file.name is not used */
-	buffer = kmalloc(count, GFP_KERNEL);
-	if ( buffer == NULL ) {
-		pr_err("[0x%x] can not allocate memory\n", i2c->addr);
-		return  -ENOMEM;
-	}
-	if (copy_from_user(buffer, user_buf, count))
-		return -EFAULT;
-
-	mutex_lock(&tfa98xx->dsp_lock);
-
-	err = send_tfa_cal_apr(buffer, count, false);
-	if (err) {
-		pr_err("[0x%x] dsp_msg error: %d\n", i2c->addr, err);
-	}
-
-	mdelay(2);
-
-	mutex_unlock(&tfa98xx->dsp_lock);
-
-	kfree(buffer);
-
-	if (err)
-		return err;
-	return count;
-}
-#else
-static ssize_t tfa98xx_dbgfs_rpc_send(struct file *file,
-				     const char __user *user_buf,
-				     size_t count, loff_t *ppos)
+	const char __user *user_buf,
+	size_t count, loff_t *ppos)
 {
 	struct i2c_client *i2c = file->private_data;
 	struct tfa98xx *tfa98xx = i2c_get_clientdata(i2c);
@@ -859,7 +779,6 @@ static ssize_t tfa98xx_dbgfs_rpc_send(struct file *file,
 		return err;
 	return count;
 }
-#endif
 /* -- RPC */
 
 static int tfa98xx_dbgfs_pga_gain_get(void *data, u64 *val)
