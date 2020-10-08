@@ -38,6 +38,7 @@
 #include <linux/slab.h>
 #include <linux/uaccess.h>
 #define	START_REPORT_BAT_TEMPRATURE	620
+#endif
 
 #ifdef CONFIG_FORCE_FAST_CHARGE
 #include <linux/fastchg.h>
