@@ -1589,7 +1589,7 @@ struct hdd_adapter_s {
 	bool offloads_configured;
 
 	/* DSCP to UP QoS Mapping */
-	sme_QosWmmUpType hddWmmDscpToUpMap[WLAN_HDD_MAX_DSCP + 1];
+	sme_QosWmmUpType hddWmmDscpToUpMap[WLAN_MAX_DSCP + 1];
 
 #ifdef WLAN_FEATURE_LINK_LAYER_STATS
 	bool isLinkLayerStatsSet;
@@ -2028,7 +2028,6 @@ struct hdd_context_s {
 	/** P2P Device MAC Address for the adapter  */
 	struct qdf_mac_addr p2pDeviceAddress;
 
-	qdf_wake_lock_t rx_wake_lock;
 	qdf_wake_lock_t sap_wake_lock;
 
 #ifdef FEATURE_WLAN_TDLS

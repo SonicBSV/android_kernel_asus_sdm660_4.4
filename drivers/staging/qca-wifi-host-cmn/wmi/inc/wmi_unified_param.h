@@ -285,6 +285,28 @@ typedef enum {
 	WMI_HOST_MODE_MAX	= 16
 } WMI_HOST_WLAN_PHY_MODE;
 
+/**
+ * enum wmi_host_channel_width: Channel operating width. Maps to
+ *               wmi_channel_width used in firmware header file(s).
+ * @WMI_HOST_CHAN_WIDTH_20: 20 MHz channel operating width
+ * @WMI_HOST_CHAN_WIDTH_40: 40 MHz channel operating width
+ * @WMI_HOST_CHAN_WIDTH_80: 80 MHz channel operating width
+ * @WMI_HOST_CHAN_WIDTH_160: 160 MHz channel operating width
+ * @WMI_HOST_CHAN_WIDTH_80P80: 80+80 MHz channel operating width
+ * @WMI_HOST_CHAN_WIDTH_5: 5 MHz channel operating width
+ * @WMI_HOST_CHAN_WIDTH_10: 10 MHz channel operating width
+ * @WMI_HOST_CHAN_WIDTH_165: 165 MHz channel operating width
+ */
+typedef enum {
+	WMI_HOST_CHAN_WIDTH_20    = 0,
+	WMI_HOST_CHAN_WIDTH_40    = 1,
+	WMI_HOST_CHAN_WIDTH_80    = 2,
+	WMI_HOST_CHAN_WIDTH_160   = 3,
+	WMI_HOST_CHAN_WIDTH_80P80 = 4,
+	WMI_HOST_CHAN_WIDTH_5     = 5,
+	WMI_HOST_CHAN_WIDTH_10    = 6,
+	WMI_HOST_CHAN_WIDTH_165   = 7,
+} wmi_host_channel_width;
 
 /**
  * enum wmi_dwelltime_adaptive_mode: dwelltime_mode
@@ -1126,6 +1148,7 @@ struct scan_stop_params {
 /**
  * struct scan_chan_list_params  - scan channel list cmd parameter
  * @num_scan_chans: no of scan channels
+ * @max_bw_support_present: max BW support present
  * @chan_info: pointer to wmi channel info
  */
 #ifdef CONFIG_MCL
@@ -1149,6 +1172,7 @@ typedef struct {
 
 struct scan_chan_list_params {
 	uint8_t num_scan_chans;
+	bool max_bw_support_present;
 	wmi_channel_param *chan_info;
 };
 #else
@@ -2881,7 +2905,6 @@ struct ll_stats_get_params {
  * @sta_id: Per STA stats request must contain valid
  * @stats_mask: categories of stats requested
  * @session_id: wsm ts spec flag
- * @pdev_id: PDEV id
  */
 struct pe_stats_req {
 	/* Common for all types are requests */
@@ -2891,7 +2914,6 @@ struct pe_stats_req {
 	/* categories of stats requested. look at ePEStatsMask */
 	uint32_t stats_mask;
 	uint8_t session_id;
-	uint8_t pdev_id;
 };
 
 /**

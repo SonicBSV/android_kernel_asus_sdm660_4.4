@@ -4541,10 +4541,6 @@ struct reg_table_entry g_registry_table[] = {
 		CFG_CRASH_FW_TIMEOUT_DEFAULT,
 		CFG_CRASH_FW_TIMEOUT_DISABLE,
 		CFG_CRASH_FW_TIMEOUT_ENABLE),
-	REG_VARIABLE(CFG_RX_WAKELOCK_TIMEOUT_NAME, WLAN_PARAM_Integer,
-		struct hdd_config, rx_wakelock_timeout,
-		VAR_FLAGS_OPTIONAL | VAR_FLAGS_RANGE_CHECK_ASSUME_DEFAULT,
-		0, 0, 0),
 
 	REG_VARIABLE(CFG_SAP_CH_SWITCH_BEACON_CNT, WLAN_PARAM_Integer,
 		     struct hdd_config, sap_chanswitch_beacon_cnt,
@@ -8569,15 +8565,14 @@ static bool hdd_update_vht_cap_in_cfg(hdd_context_t *hdd_ctx)
 	    (config->dot11Mode == eHDD_DOT11_MODE_11ac)) {
 		/* Currently shortGI40Mhz is used for shortGI80Mhz and 160MHz*/
 		if (sme_cfg_set_int(hdd_ctx->hHal, WNI_CFG_VHT_SHORT_GI_80MHZ,
-		    config->ShortGI40MhzEnable) == QDF_STATUS_E_FAILURE) {
+		    config->ShortGI80MhzEnable) == QDF_STATUS_E_FAILURE) {
 			status = false;
 			hdd_err("Couldn't pass WNI_VHT_SHORT_GI_80MHZ to CFG");
 		}
 
 		if (sme_cfg_set_int(hdd_ctx->hHal,
-				    WNI_CFG_VHT_SHORT_GI_160_AND_80_PLUS_80MHZ,
-				    config->ShortGI40MhzEnable) ==
-							QDF_STATUS_E_FAILURE) {
+		    WNI_CFG_VHT_SHORT_GI_160_AND_80_PLUS_80MHZ,
+		    config->ShortGI160MhzEnable) == QDF_STATUS_E_FAILURE) {
 			status = false;
 			hdd_err("Couldn't pass SHORT_GI_160MHZ to CFG");
 		}

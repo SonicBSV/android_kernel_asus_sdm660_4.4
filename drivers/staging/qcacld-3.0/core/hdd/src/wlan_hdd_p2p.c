@@ -804,7 +804,7 @@ QDF_STATUS wlan_hdd_remain_on_channel_callback(tHalHandle hHal, void *pCtx,
 	 */
 	/* If ssr is inprogress, do not schedule next roc req */
 	if (!hdd_ctx->is_ssr_in_progress)
-		schedule_delayed_work(&hdd_ctx->roc_req_work, 0);
+	queue_delayed_work(system_freezable_wq, &hdd_ctx->roc_req_work, 0);
 
 	return QDF_STATUS_SUCCESS;
 }
@@ -1541,7 +1541,7 @@ static int wlan_hdd_request_remain_on_channel(struct wiphy *wiphy,
 						HDD_P2P_MAX_ROC_DURATION;
 
 			wlan_hdd_roc_request_enqueue(pAdapter, pRemainChanCtx);
-			schedule_delayed_work(&pHddCtx->roc_req_work,
+			queue_delayed_work(system_freezable_wq, &pHddCtx->roc_req_work,
 			msecs_to_jiffies(
 				pHddCtx->config->p2p_listen_defer_interval));
 			hdd_debug("Defer interval is %hu, pAdapter %pK",
@@ -1583,7 +1583,7 @@ static int wlan_hdd_request_remain_on_channel(struct wiphy *wiphy,
 	 */
 	if (isBusy == false && pAdapter->is_roc_inprogress == false) {
 		hdd_debug("scheduling delayed work: no connection/roc active");
-		schedule_delayed_work(&pHddCtx->roc_req_work, 0);
+		queue_delayed_work(system_freezable_wq, &pHddCtx->roc_req_work, 0);
 	}
 	return 0;
 }
@@ -3554,7 +3554,6 @@ static void process_tdls_rx_action_frame(hdd_adapter_t *adapter,
 static bool process_rx_public_action_frame(hdd_adapter_t *adapter,
 					   uint8_t *pb_frames,
 					   hdd_cfg80211_state_t *cfg_state,
-					   enum action_frm_type frm_type,
 					   uint32_t frm_len, uint16_t freq,
 					   int8_t rx_rssi)
 {
@@ -3621,7 +3620,6 @@ void __hdd_indicate_mgmt_frame(hdd_adapter_t *adapter, uint32_t frm_len,
 	uint16_t freq;
 	uint8_t type = 0;
 	uint8_t sub_type = 0;
-	enum action_frm_type frm_type;
 	hdd_cfg80211_state_t *cfg_state;
 	hdd_context_t *hdd_ctx;
 	uint8_t broadcast = 0;
@@ -3696,7 +3694,7 @@ void __hdd_indicate_mgmt_frame(hdd_adapter_t *adapter, uint32_t frm_len,
 		bool processed;
 
 		processed = process_rx_public_action_frame(adapter, pb_frames,
-							   cfg_state, frm_type,
+							   cfg_state,
 							   frm_len, freq,
 							   rx_rssi);
 		if (!processed) {

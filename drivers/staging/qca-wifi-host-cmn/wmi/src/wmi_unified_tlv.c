@@ -1778,6 +1778,9 @@ QDF_STATUS send_scan_chan_list_cmd_tlv(wmi_unified_t wmi_handle,
 	WMI_LOGD("no of channels = %d, len = %d", chan_list->num_scan_chans, len);
 
 	cmd->num_scan_chans = chan_list->num_scan_chans;
+	if (chan_list->max_bw_support_present)
+		cmd->flags |= CHANNEL_MAX_BANDWIDTH_VALID;
+
 	WMITLV_SET_HDR((buf_ptr + sizeof(wmi_scan_chan_list_cmd_fixed_param)),
 		       WMITLV_TAG_ARRAY_STRUC,
 		       sizeof(wmi_channel) * chan_list->num_scan_chans);
@@ -7373,7 +7376,6 @@ QDF_STATUS send_get_stats_cmd_tlv(wmi_unified_t wmi_handle,
 		WMI_REQUEST_PEER_STAT | WMI_REQUEST_PDEV_STAT |
 		WMI_REQUEST_VDEV_STAT | WMI_REQUEST_RSSI_PER_CHAIN_STAT;
 	cmd->vdev_id = get_stats_param->session_id;
-	cmd->pdev_id = get_stats_param->pdev_id;
 	WMI_CHAR_ARRAY_TO_MAC_ADDR(addr, &cmd->peer_macaddr);
 	WMI_LOGD("STATS REQ VDEV_ID:%d-->", cmd->vdev_id);
 	if (wmi_unified_cmd_send(wmi_handle, buf, len,
