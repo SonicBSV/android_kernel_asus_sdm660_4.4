@@ -547,8 +547,8 @@ int msm_isp_release_stats_stream(struct vfe_device *vfe_dev, void *arg)
 		stream_info->stream_handle[i] = stream_info->stream_handle[k];
 		stream_info->buffer_offset[i] = stream_info->buffer_offset[k];
 	}
-
-	stream_info->num_isp--;
+	
+    stream_info->num_isp--;
 	stream_info->vfe_dev[stream_info->num_isp] = 0;
 	stream_info->stream_handle[stream_info->num_isp] = 0;
 	stream_info->buffer_offset[stream_info->num_isp] = 0;
