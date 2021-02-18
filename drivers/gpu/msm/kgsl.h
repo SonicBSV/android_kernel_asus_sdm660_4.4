@@ -84,6 +84,13 @@
 #define SCRATCH_RPTR_GPU_ADDR(dev, id) \
 	((dev)->scratch.gpuaddr + SCRATCH_RPTR_OFFSET(id))
 
+#define SCRATCH_PREEMPTION_CTXT_RESTORE_ADDR_OFFSET(id) \
+	(SCRATCH_RPTR_OFFSET(KGSL_PRIORITY_MAX_RB_LEVELS) + \
+	((id) * sizeof(uint64_t)))
+#define SCRATCH_PREEMPTION_CTXT_RESTORE_GPU_ADDR(dev, id) \
+	((dev)->scratch.gpuaddr + \
+	SCRATCH_PREEMPTION_CTXT_RESTORE_ADDR_OFFSET(id))
+
 /* Timestamp window used to detect rollovers (half of integer range) */
 #define KGSL_TIMESTAMP_WINDOW 0x80000000
 
