@@ -72,7 +72,7 @@ static void scm_disable_sdi(void);
 
 static int in_panic;
 static int dload_type = SCM_DLOAD_FULLDUMP;
-static int download_mode;
+static int download_mode = 1;
 static struct kobject dload_kobj;
 static void *dload_mode_addr, *dload_type_addr;
 static bool dload_mode_enabled;
@@ -292,17 +292,6 @@ static void msm_restart_prepare(const char *cmd)
 	} else {
 		need_warm_reset = (get_dload_mode() ||
 				(cmd != NULL && cmd[0] != '\0'));
-	}
-
-#ifdef CONFIG_QCOM_PRESERVE_MEM
-	need_warm_reset = true;
-#endif
-
-	/* Perform a regular reboot upon panic or unspecified command */
-	if (in_panic || !cmd) {
-		__raw_writel(0x77665501, restart_reason);
-		cmd = NULL;
-		in_panic = false;
 	}
 
 	/* Hard reset the PMIC unless memory contents must be maintained. */

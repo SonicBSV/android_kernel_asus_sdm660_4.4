@@ -61,7 +61,6 @@ static bool is_compatible(char *compat)
 
 static inline enum imem_type read_imem_type(struct platform_device *pdev)
 {
-
 	return is_compatible("qcom,msm-ocmem") ? IMEM_OCMEM :
 		is_compatible("qcom,msm-vmem") ? IMEM_VMEM :
 						IMEM_NONE;

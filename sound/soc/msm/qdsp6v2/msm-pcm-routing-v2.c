@@ -1571,6 +1571,10 @@ int msm_pcm_routing_reg_phy_stream(int fedai_id, int perf_mode,
 	/* re-enable EQ if active */
 	msm_qti_pp_send_eq_values(fedai_id);
 	for (i = 0; i < MSM_BACKEND_DAI_MAX; i++) {
+
+		if (test_bit(fedai_id, &msm_bedais[i].fe_sessions[0]))
+			msm_bedais[i].passthr_mode[fedai_id] = LEGACY_PCM;
+
 		if (!is_be_dai_extproc(i) &&
 		   (afe_get_port_type(msm_bedais[i].port_id) == port_type) &&
 		   (msm_bedais[i].active) &&
@@ -16944,7 +16948,7 @@ static const struct soc_enum mi2s_rx_vi_fb_mux_enum =
 #ifdef CONFIG_MACH_ASUS_X00T
 	SOC_VALUE_ENUM_DOUBLE(0, MSM_BACKEND_DAI_TERTIARY_MI2S_RX, 0, 0,
 #else
-	SOC_VALUE_ENUM_DOUBLE(0, MSM_BACKEND_DAI_PRI_MI2S_RX, 0, 0,
+	SOC_VALUE_ENUM_DOUBLE(SND_SOC_NOPM, MSM_BACKEND_DAI_PRI_MI2S_RX, 0, 0,
 #endif
 	ARRAY_SIZE(mi2s_rx_vi_fb_tx_mux_text),
 	mi2s_rx_vi_fb_tx_mux_text, mi2s_rx_vi_fb_tx_value);
