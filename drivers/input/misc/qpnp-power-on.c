@@ -33,7 +33,7 @@
 #include <linux/input/qpnp-power-on.h>
 #include <linux/power_supply.h>
 
-#ifdef CONFIG_MACH_ASUS_X00TD
+#ifdef CONFIG_MACH_ASUS_X00T
 #include <linux/timer.h>
 
 static struct timer_list tm;
@@ -1281,7 +1281,7 @@ qpnp_pon_config_input(struct qpnp_pon *pon,  struct qpnp_pon_config *cfg)
 	return 0;
 }
 
-#ifdef CONFIG_MACH_ASUS_X00TD
+#ifdef CONFIG_MACH_ASUS_X00T
 static int
 qpnp_config_reset_reg(struct qpnp_pon *pon, struct qpnp_pon_config *cfg)
 {
@@ -1711,7 +1711,7 @@ static int qpnp_pon_config_init(struct qpnp_pon *pon)
 			dev_err(&pon->pdev->dev, "Unable to request-irq's\n");
 			goto unreg_input_dev;
 		}
-#ifdef CONFIG_MACH_ASUS_X00TD
+#ifdef CONFIG_MACH_ASUS_X00T
 		if(cfg->pon_type == PON_KPDPWR){
 			start_timer(pon, cfg);
 		}
