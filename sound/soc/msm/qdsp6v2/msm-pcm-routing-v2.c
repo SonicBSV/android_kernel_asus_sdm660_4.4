@@ -16946,7 +16946,7 @@ static const struct soc_enum slim0_rx_vi_fb_rch_mux_enum =
 
 static const struct soc_enum mi2s_rx_vi_fb_mux_enum =
 #ifdef CONFIG_MACH_ASUS_X00T
-	SOC_VALUE_ENUM_DOUBLE(0, MSM_BACKEND_DAI_TERTIARY_MI2S_RX, 0, 0,
+	SOC_VALUE_ENUM_DOUBLE(SND_SOC_NOPM, MSM_BACKEND_DAI_TERTIARY_MI2S_RX, 0, 0,
 #else
 	SOC_VALUE_ENUM_DOUBLE(SND_SOC_NOPM, MSM_BACKEND_DAI_PRI_MI2S_RX, 0, 0,
 #endif
