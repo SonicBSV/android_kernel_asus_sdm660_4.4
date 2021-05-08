@@ -98,15 +98,6 @@ static struct workqueue_struct *asus_lcd_early_unblank_wq;
 extern int g_resume_from_fp;
 #endif
 
-#define MDSS_BRIGHT_TO_BL_DIM(out, v) do {\
-			out = (12*v*v+1393*v+3060)/4465;\
-			} while (0)
-bool backlight_dimmer = false;
-module_param(backlight_dimmer, bool, 0644);
-
-int backlight_min = 0;
-module_param(backlight_min, int, 0644);
-
 static struct fb_info *fbi_list[MAX_FBI_LIST];
 static int fbi_list_index;
 
@@ -315,18 +306,10 @@ static void mdss_fb_set_bl_brightness(struct led_classdev *led_cdev,
 	if (value > mfd->panel_info->brightness_max)
 		value = mfd->panel_info->brightness_max;
 
-	// Boeffla: apply min limits for LCD backlight (0 is exception for display off)
-	if (value != 0 && value < backlight_min)
-		value = backlight_min;
-
-	if (backlight_dimmer) {
-		MDSS_BRIGHT_TO_BL_DIM(bl_lvl, value);
-	} else {
-		/* This maps android backlight level 0 to 255 into
-		   driver backlight level 0 to bl_max with rounding */
-		MDSS_BRIGHT_TO_BL(bl_lvl, value, mfd->panel_info->bl_max,
-					mfd->panel_info->brightness_max);
-	}
+	/* This maps android backlight level 0 to 255 into
+	   driver backlight level 0 to bl_max with rounding */
+	MDSS_BRIGHT_TO_BL(bl_lvl, value, mfd->panel_info->bl_max,
+				mfd->panel_info->brightness_max);
 
 	if (!bl_lvl && value)
 		bl_lvl = 1;
@@ -4093,7 +4076,7 @@ static int mdss_fb_set_par(struct fb_info *info)
 {
 	struct msm_fb_data_type *mfd = (struct msm_fb_data_type *)info->par;
 	struct fb_var_screeninfo *var = &info->var;
-	int old_imgType, old_format;
+	int old_imgType, old_format, out_format;
 	int ret = 0;
 
 	ret = mdss_fb_pan_idle(mfd);
@@ -4177,9 +4160,9 @@ static int mdss_fb_set_par(struct fb_info *info)
 				mfd->fbi->var.yres) * mfd->fb_page;
 
 	old_format = mfd->panel_info->out_format;
-	mfd->panel_info->out_format =
-			mdss_grayscale_to_mdp_format(var->grayscale);
-	if (!IS_ERR_VALUE(mfd->panel_info->out_format)) {
+	out_format = mdss_grayscale_to_mdp_format(var->grayscale);
+	if (!IS_ERR_VALUE(out_format)) {
+		mfd->panel_info->out_format = out_format;
 		if (old_format != mfd->panel_info->out_format)
 			mfd->panel_reconfig = true;
 	}
