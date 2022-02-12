@@ -336,6 +336,7 @@ struct synaptics_rmi4_device_info {
  * @sensor_max_y: maximum y coordinate for 2D touch
  * @force_min: minimum force value
  * @force_max: maximum force value
+ * @set_wakeup_gesture: location of set wakeup gesture
  * @flash_prog_mode: flag to indicate flash programming mode status
  * @irq_enabled: flag to indicate attention interrupt enable status
  * @fingers_on_2d: flag to indicate presence of fingers in 2D area
@@ -407,6 +408,7 @@ struct synaptics_rmi4_data {
 	int sensor_max_y;
 	int force_min;
 	int force_max;
+	int set_wakeup_gesture;
 	bool flash_prog_mode;
 	bool irq_enabled;
 	bool fingers_on_2d;
