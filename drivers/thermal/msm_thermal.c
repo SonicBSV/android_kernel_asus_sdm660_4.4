@@ -1,4 +1,4 @@
-/* Copyright (c) 2012-2020, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2019, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -997,8 +997,9 @@ static int  msm_thermal_cpufreq_callback(struct notifier_block *nfb,
 
 	switch (event) {
 	case CPUFREQ_ADJUST:
-		max_freq_req = (lmh_dcvs_is_supported) ? UINT_MAX :
-			cpus[policy->cpu].parent_ptr->limited_max_freq;
+		/* max_freq_req = (lmh_dcvs_is_supported) ? UINT_MAX :
+			cpus[policy->cpu].parent_ptr->limited_max_freq;*/
+		max_freq_req = cpus[policy->cpu].parent_ptr->limited_max_freq;
 		min_freq_req = cpus[policy->cpu].parent_ptr->limited_min_freq;
 		pr_debug("mitigating CPU%d to freq max: %u min: %u\n",
 			policy->cpu, max_freq_req, min_freq_req);
@@ -1138,7 +1139,7 @@ static void update_cpu_freq(int cpu, enum freq_limits changed)
 		 */
 		if (lmh_dcvs_available) {
 			msm_lmh_dcvs_update(cpu);
-			if (changed & FREQ_LIMIT_MIN)
+			if (changed/* & FREQ_LIMIT_MIN*/)
 				cpufreq_update_policy(cpu);
 		} else {
 			cpufreq_update_policy(cpu);
@@ -2803,7 +2804,7 @@ static int do_vdd_mx(void)
 		}
 	}
 
-	if (dis_cnt == thresh[MSM_VDD_MX_RESTRICTION].thresh_ct) {
+	if ((dis_cnt == thresh[MSM_VDD_MX_RESTRICTION].thresh_ct)) {
 		ret = remove_vdd_mx_restriction();
 		if (ret)
 			pr_err("Failed to remove vdd mx restriction\n");
@@ -6293,7 +6294,7 @@ static int fetch_cpu_mitigaiton_info(struct msm_thermal_data *data,
 		struct platform_device *pdev)
 {
 
-	int _cpu = 0, err = 0, sensor_name_len = 0;
+	int _cpu = 0, err = 0;
 	struct device_node *cpu_node = NULL, *limits = NULL, *tsens = NULL;
 	char *key = NULL;
 	struct device_node *node = pdev->dev.of_node;
@@ -6351,9 +6352,8 @@ static int fetch_cpu_mitigaiton_info(struct msm_thermal_data *data,
 			err = -ENOMEM;
 			goto fetch_mitig_exit;
 		}
-		sensor_name_len = strlen(sensor_name);
 		strlcpy((char *) cpus[_cpu].sensor_type, sensor_name,
-			sensor_name_len + 1);
+			strlen(sensor_name) + 1);
 		create_alias_name(_cpu, limits, pdev);
 	}
 
