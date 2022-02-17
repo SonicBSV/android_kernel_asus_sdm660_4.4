@@ -4782,7 +4782,7 @@ static int mdss_fb_atomic_commit_ioctl(struct fb_info *info,
 			mfd->mdp.signal_retire_fence(mfd,
 						mdp5_data->retire_cnt);
 #ifndef CONFIG_MACH_ASUS_X00T
-		return 0;
+		//return 0;
 #endif
 	}
 

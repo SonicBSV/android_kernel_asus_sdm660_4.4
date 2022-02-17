@@ -1365,11 +1365,11 @@ static int mdss_dsi_off(struct mdss_panel_data *pdata, int power_state)
 
 panel_power_ctrl:
 #ifndef CONFIG_MACH_ASUS_X00T
-	ret = mdss_dsi_panel_power_ctrl(pdata, power_state);
+	/*ret = mdss_dsi_panel_power_ctrl(pdata, power_state);
 	if (ret) {
 		pr_err("%s: Panel power off failed\n", __func__);
 		goto end;
-	}
+	}*/
 #endif
 	if (panel_info->dynamic_fps
 	    && (panel_info->dfps_update == DFPS_SUSPEND_RESUME_MODE)
