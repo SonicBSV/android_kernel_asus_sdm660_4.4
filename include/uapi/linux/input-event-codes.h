@@ -601,6 +601,10 @@
 #define KEY_SCREENSAVER		0x245	/* AL Screen Saver */
 #define KEY_VOICECOMMAND		0x246	/* Listening Voice Command */
 
+#define KEY_BRIGHTNESS_MIN		0x250	/* Set Brightness to Minimum */
+#define KEY_BRIGHTNESS_MAX		0x251	/* Set Brightness to Maximum */
+
+/* Huaqin add define for fingerprint nav-keycode by leiyu at 2018/04/12 start */
 #define FP_KEY_UP			0x258
 #define FP_KEY_DOWN		0x259
 #define FP_KEY_LEFT		0x25a
@@ -608,9 +612,7 @@
 #define FP_KEY_CLICK		0x25c
 #define FP_KEY_DOUBLE_CLICK		0x25d
 #define FP_KEY_LONG_PRESS          0x25e
-
-#define KEY_BRIGHTNESS_MIN		0x250	/* Set Brightness to Minimum */
-#define KEY_BRIGHTNESS_MAX		0x251	/* Set Brightness to Maximum */
+/* Huaqin add define for fingerprint nav-keycode by leiyu at 2018/04/12 end */
 
 #define KEY_KBDINPUTASSIST_PREV		0x260
 #define KEY_KBDINPUTASSIST_NEXT		0x261
@@ -661,9 +663,11 @@
 #define BTN_TRIGGER_HAPPY39		0x2e6
 #define BTN_TRIGGER_HAPPY40		0x2e7
 
+
 #define KEY_SARSENSOR_NEAR		0x2ea
 #define KEY_SARSENSOR_FAR		0x2eb
 
+/* Huaqin add  for TT1176710 by liunianliang at 2018/03/30 start */
 #define KEY_TP_GESTURE_W 	253
 #define KEY_TP_GESTURE_E 	250
 #define KEY_TP_GESTURE_S 	251
@@ -671,6 +675,7 @@
 #define KEY_TP_GESTURE_C 	249
 #define KEY_TP_GESTURE_V 	252
 #define KEY_TP_GESTURE_SWIPE_UP		255
+/* Huaqin add  for TT1176710 by liunianliang at 2018/03/30 end */
 
 /* We avoid low common keys in module aliases so they don't get huge. */
 #define KEY_MIN_INTERESTING	KEY_MUTE
