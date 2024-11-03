@@ -15,6 +15,10 @@
 #include <linux/syscalls.h>
 #include <linux/pagemap.h>
 
+#ifdef CONFIG_KSU
+#include <linux/ksu.h>
+#endif
+
 #include <asm/uaccess.h>
 #include <asm/unistd.h>
 
@@ -87,20 +91,29 @@ int vfs_fstat(unsigned int fd, struct kstat *stat)
 }
 EXPORT_SYMBOL(vfs_fstat);
 
+#ifdef CONFIG_KSU
+extern int ksu_handle_stat(int *dfd, const char __user **filename_user, int *flags);
+#endif
+
 int vfs_fstatat(int dfd, const char __user *filename, struct kstat *stat,
-		int flag)
+		int flags)
 {
 	struct path path;
 	int error = -EINVAL;
 	unsigned int lookup_flags = 0;
 
-	if ((flag & ~(AT_SYMLINK_NOFOLLOW | AT_NO_AUTOMOUNT |
+#ifdef CONFIG_KSU
+	if (get_ksu_state() > 0)
+		ksu_handle_stat(&dfd, &filename, &flags);
+#endif
+
+	if ((flags & ~(AT_SYMLINK_NOFOLLOW | AT_NO_AUTOMOUNT |
 		      AT_EMPTY_PATH)) != 0)
 		goto out;
 
-	if (!(flag & AT_SYMLINK_NOFOLLOW))
+	if (!(flags & AT_SYMLINK_NOFOLLOW))
 		lookup_flags |= LOOKUP_FOLLOW;
-	if (flag & AT_EMPTY_PATH)
+	if (flags & AT_EMPTY_PATH)
 		lookup_flags |= LOOKUP_EMPTY;
 retry:
 	error = user_path_at(dfd, filename, lookup_flags, &path);
