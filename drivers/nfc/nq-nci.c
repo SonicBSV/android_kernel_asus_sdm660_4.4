@@ -494,7 +494,7 @@ int nfc_ioctl_power_states(struct file *filp, unsigned long arg)
 		 * layers.
 		 */
 #ifndef CONFIG_MACH_ASUS_X00T
-		nqx_disable_irq(nqx_dev);
+		/*nqx_disable_irq(nqx_dev);*/
 #endif
 		dev_dbg(&nqx_dev->client->dev,
 			"gpio_set_value disable: %s: info: %p\n",
@@ -1067,8 +1067,9 @@ static int nqx_probe(struct i2c_client *client,
 			goto err_clkreq_gpio;
 		}
 	} else {
-		dev_warn(&client->dev,
+		dev_err(&client->dev,
 			"%s: clkreq gpio not provided\n", __func__);
+		goto err_ese_gpio;
 	}
 
 	nqx_dev->en_gpio = platform_data->en_gpio;
@@ -1109,12 +1110,14 @@ static int nqx_probe(struct i2c_client *client,
 	 */
 	r = nfcc_hw_check(client, nqx_dev);
 #ifndef CONFIG_MACH_ASUS_X00T
+	/*
 	if (r) {
-		/* make sure NFCC is not enabled */
+		// make sure NFCC is not enabled
 		gpio_set_value(platform_data->en_gpio, 0);
-		/* We don't think there is hardware switch NFC OFF */
+		// We don't think there is hardware switch NFC OFF
 		goto err_request_hw_check_failed;
 	}
+	*/
 #endif
 
 	/* Show if hardware supports nfc. */
