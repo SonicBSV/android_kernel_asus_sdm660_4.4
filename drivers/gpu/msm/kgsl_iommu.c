@@ -695,7 +695,8 @@ static void _get_entries(struct kgsl_process_private *private,
 		prev->flags = p->memdesc.flags;
 		prev->priv = p->memdesc.priv;
 		prev->pending_free = p->pending_free;
-		prev->pid = pid_nr(private->pid);
+		/* Safe PID extraction: handle both pid_t and struct pid * */
+		prev->pid = private->pid ? pid_nr(private->pid) : 0;
 		__kgsl_get_memory_usage(prev);
 	}
 
@@ -705,7 +706,7 @@ static void _get_entries(struct kgsl_process_private *private,
 		next->flags = n->memdesc.flags;
 		next->priv = n->memdesc.priv;
 		next->pending_free = n->pending_free;
-		next->pid = pid_nr(private->pid);
+		next->pid = private->pid ? pid_nr(private->pid) : 0;
 		__kgsl_get_memory_usage(next);
 	}
 }
@@ -816,6 +817,8 @@ static int kgsl_iommu_fault_handler(struct iommu_domain *domain,
 	u64 ptbase;
 	u32 contextidr;
 	pid_t tid = 0;
+	pid_t pid = 0;
+	pid_t pid = 0;
 	pid_t ptname;
 	struct _mem_entry prev, next;
 	int write;
@@ -824,6 +827,8 @@ static int kgsl_iommu_fault_handler(struct iommu_domain *domain,
 	unsigned int no_page_fault_log = 0;
 	unsigned int curr_context_id = 0;
 	struct kgsl_context *context;
+	struct kgsl_process_private *private = NULL;
+	struct kgsl_process_private *private = NULL;
 	char *fault_type = "unknown";
 
 	static DEFINE_RATELIMIT_STATE(_rs,
@@ -869,6 +874,20 @@ static int kgsl_iommu_fault_handler(struct iommu_domain *domain,
 		/* save pagefault timestamp for GFT */
 		set_bit(KGSL_CONTEXT_PRIV_PAGEFAULT, &context->priv);
 		tid = context->tid;
+
+		private = context->proc_priv;
+		if (private != NULL)
+			pid = pid_nr(private->pid);
+
+		private = context->proc_priv;
+		/*
+		 * CRITICAL FIX: private->pid on new kernels is 'struct pid *',
+		 * not pid_t. Direct assignment causes -Wint-conversion warning
+		 * and undefined behavior (pointer truncation on 64-bit).
+		 * Use pid_nr() for safe extraction.
+		 */
+		if (private != NULL)
+			pid = pid_nr(private->pid);
 	}
 
 	ctx->fault = 1;
@@ -914,7 +933,8 @@ static int kgsl_iommu_fault_handler(struct iommu_domain *domain,
 			api_str = "UNKNOWN";
 
 		KGSL_MEM_CRIT(ctx->kgsldev,
-			"GPU PAGE FAULT: addr = %lX pid= %d\n", addr, ptname);
+			"GPU PAGE FAULT: addr = %lX pid= %d tid= %d\n",
+			addr, pid, ptname);
 		KGSL_MEM_CRIT(ctx->kgsldev,
 			"context=%s ctx_type=%s TTBR0=0x%llx CIDR=0x%x (%s %s fault)\n",
 			ctx->name, api_str, ptbase, contextidr,
