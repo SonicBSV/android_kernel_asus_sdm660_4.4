@@ -39,7 +39,7 @@
 #define ACTIVE_PEN_DRIVER_NAME "synaptics_dsxv27_active_pen"
 #define PROXIMITY_DRIVER_NAME "synaptics_dsxv27_proximity"
 #define GESTURE_DRIVER_NAME "synaptics_dsxv27_gesture"
-#define I2C_DRIVER_NAME "synaptics_dsxv27_i2c"
+#define I2C_DRIVER_NAME "syn_dsxv27_i2c"
 #define SPI_DRIVER_NAME "synaptics_dsxv27_spi"
 
 /*
