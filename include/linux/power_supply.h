@@ -276,6 +276,9 @@ enum power_supply_property {
 	POWER_SUPPLY_PROP_PARALLEL_FCC_MAX,
 	POWER_SUPPLY_PROP_MIN_ICL,
 	POWER_SUPPLY_PROP_FG_RESET_CLOCK,
+	/* Huaqin modify for ZQL1820-HQ000002 Identify adapter ID to upper by gaochao at 2018/10/24 start */
+	POWER_SUPPLY_PROP_ADAPTER_ID,
+	/* Huaqin modify for ZQL1820-HQ000002 Identify adapter ID to upper by gaochao at 2018/10/24 end */
 	/* Local extensions of type int64_t */
 	POWER_SUPPLY_PROP_CHARGE_COUNTER_EXT,
 	/* Properties of type `const char *' */
